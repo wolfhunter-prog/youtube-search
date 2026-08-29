@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>매일 인기 주제 확인하기</title>
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --ink:#1A1A1A;
+    --sub:#4A4A4A;
+    --line:#E3E3E3;
+    --panel:#F7F7F5;
+    --red:#E01B24;
+    --red-dark:#B3141C;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    line-height:1.5;
+  }
+  .wrap{ max-width:760px; margin:0 auto; padding:26px 18px 60px; }
+  h1{ font-size:28px; margin:0 0 6px; text-align:center; }
+  .lead{ text-align:center; color:var(--sub); font-size:18px; margin:0 0 24px; }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:20px;
+  }
+  label{ display:block; font-size:19px; font-weight:700; margin-bottom:8px; }
+  input[type=text], input[type=password]{
+    width:100%;
+    font-size:19px;
+    padding:12px 14px;
+    border:2px solid var(--line);
+    border-radius:10px;
+    margin-bottom:10px;
+  }
+  .small{ font-size:15px; color:var(--sub); margin:0 0 12px; }
+  .row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+  .toggle-btn{
+    font-size:17px;
+    padding:10px 18px;
+    border-radius:24px;
+    border:2px solid var(--line);
+    background:#fff;
+    cursor:pointer;
+  }
+  .toggle-btn.active{
+    background:var(--red);
+    color:#fff;
+    border-color:var(--red);
+  }
+  .search-btn{
+    font-size:17px;
+    padding:10px 18px;
+    border-radius:24px;
+    border:2px solid var(--red);
+    background:var(--red);
+    color:#fff;
+    cursor:pointer;
+  }
+  .cats{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:6px; }
+  .cat-btn{
+    font-size:18px;
+    padding:10px 16px;
+    border-radius:24px;
+    border:2px solid var(--line);
+    background:#fff;
+    cursor:pointer;
+  }
+  .cat-btn:hover, .cat-btn:focus{ border-color:var(--red); color:var(--red-dark); }
+  .result-block{
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:18px;
+    margin-bottom:18px;
+  }
+  .result-title{ font-size:22px; font-weight:800; margin:0 0 12px; }
+  .video-item{
+    display:flex;
+    gap:12px;
+    padding:12px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .video-item:last-child{ border-bottom:none; }
+  .video-item img{ width:120px; height:68px; object-fit:cover; border-radius:8px; flex-shrink:0; }
+  .video-info a{
+    font-size:18px;
+    font-weight:700;
+    color:var(--ink);
+    text-decoration:none;
+  }
+  .video-info a:hover{ color:var(--red-dark); text-decoration:underline; }
+  .video-meta{ font-size:15px; color:var(--sub); margin-top:4px; }
+  .status{ font-size:17px; color:var(--sub); text-align:center; padding:16px 0; }
+  .error{
+    font-size:17px;
+    color:var(--red-dark);
+    background:#fff;
+    border:1px solid var(--red);
+    border-radius:10px;
+    padding:14px 16px;
+    margin-bottom:16px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>매일 인기 주제 확인하기</h1>
+  <p class="lead">관심 분야를 고르면, 최근에 사람들이 많이 본 영상을 보여드려요.</p>
+
+  <div class="card">
+    <label for="apiKey">① 열쇠(API 키) 붙여넣기</label>
+    <input type="password" id="apiKey" placeholder="구글에서 받은 열쇠를 여기에 붙여넣으세요">
+    <p class="small">이 열쇠는 화면에만 있고 저장되지 않아요. 다시 여실 때마다 한 번씩 붙여넣어 주세요.</p>
+
+    <label>② 기간 선택</label>
+    <div class="row">
+      <button type="button" class="toggle-btn active" data-days="1">오늘 (최근 24시간)</button>
+      <button type="button" class="toggle-btn" data-days="7">이번 주</button>
+    </div>
+
+    <label>③ 관심 분야를 고르세요 (여러 개 눌러도 됩니다)</label>
+    <div class="cats">
+      <button type="button" class="cat-btn" data-v="경제뉴스" data-q="경제뉴스">경제뉴스</button>
+      <button type="button" class="cat-btn" data-v="이자율" data-q="이자율">이자율</button>
+      <button type="button" class="cat-btn" data-v="환율" data-q="환율">환율</button>
+      <button type="button" class="cat-btn" data-v="금투자" data-q="금투자">금투자</button>
+      <button type="button" class="cat-btn" data-v="주식" data-q="주식 시장">주식</button>
+      <button type="button" class="cat-btn" data-v="암호화폐" data-q="암호화폐 시세">암호화폐</button>
+      <button type="button" class="cat-btn" data-v="채권" data-q="채권 시장">채권</button>
+      <button type="button" class="cat-btn" data-v="미국주식" data-q="미국주식">미국주식</button>
+      <button type="button" class="cat-btn" data-v="중국주식" data-q="중국주식">중국주식</button>
+    </div>
+
+    <label for="customTopic" style="margin-top:14px;">④ 직접 주제 입력하기 (원하는 것 아무거나)</label>
+    <div class="row">
+      <input type="text" id="customTopic" placeholder="예: 손자 선물, 반려견, 골프" style="flex:1; min-width:200px; margin-bottom:0;">
+      <button type="button" class="search-btn" id="customSearchBtn">검색</button>
+    </div>
+  </div>
+
+  <div id="results"></div>
+
+</div>
+
+<script>
+  let days = 1;
+  document.querySelectorAll(".toggle-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      document.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const parsed = parseInt(btn.dataset.days, 10);
+      days = isNaN(parsed) ? 1 : parsed;
+    });
+  });
+
+  function formatViews(n){
+    n = parseInt(n, 10) || 0;
+    if(n >= 100000000) return (n/100000000).toFixed(1) + "억회";
+    if(n >= 10000) return (n/10000).toFixed(1) + "만회";
+    return n + "회";
+  }
+
+  function formatDate(iso){
+    const d = new Date(iso);
+    return (d.getMonth()+1) + "월 " + d.getDate() + "일";
+  }
+
+  async function fetchCategory(keyword, apiKey, days){
+    const publishedAfter = new Date(Date.now() - days*24*60*60*1000).toISOString();
+    const searchUrl = "https://www.googleapis.com/youtube/v3/search"
+      + "?part=snippet&type=video&order=viewCount&regionCode=KR&relevanceLanguage=ko"
+      + "&maxResults=10"
+      + "&q=" + encodeURIComponent(keyword)
+      + "&publishedAfter=" + encodeURIComponent(publishedAfter)
+      + "&key=" + encodeURIComponent(apiKey);
+
+    const searchRes = await fetch(searchUrl);
+    const searchData = await searchRes.json();
+    if(searchData.error){
+      throw new Error(searchData.error.message || "검색 중 오류가 발생했습니다.");
+    }
+    const ids = (searchData.items || []).map(it => it.id.videoId).filter(Boolean);
+    if(ids.length === 0) return [];
+
+    const statsUrl = "https://www.googleapis.com/youtube/v3/videos"
+      + "?part=snippet,statistics&id=" + ids.join(",")
+      + "&key=" + encodeURIComponent(apiKey);
+    const statsRes = await fetch(statsUrl);
+    const statsData = await statsRes.json();
+    if(statsData.error){
+      throw new Error(statsData.error.message || "정보를 가져오는 중 오류가 발생했습니다.");
+    }
+
+    const items = (statsData.items || []);
+    items.sort((a,b) => (parseInt(b.statistics.viewCount||0,10)) - (parseInt(a.statistics.viewCount||0,10)));
+    return items;
+  }
+
+  async function runSearch(label, query){
+    query = query || label;
+    const apiKey = document.getElementById("apiKey").value.trim();
+    const results = document.getElementById("results");
+
+    if(!apiKey){
+      results.innerHTML = '<p class="error">먼저 위에 열쇠(API 키)를 붙여넣어 주세요.</p>';
+      return;
+    }
+
+    const blockId = "block-" + label;
+    let block = document.getElementById(blockId);
+    if(!block){
+      block = document.createElement("div");
+      block.className = "result-block";
+      block.id = blockId;
+      results.prepend(block);
+    }
+    block.innerHTML = '<p class="result-title">' + label + '</p><p class="status">불러오는 중입니다...</p>';
+
+    try{
+      const items = await fetchCategory(query, apiKey, days);
+      if(items.length === 0){
+        block.innerHTML = '<p class="result-title">' + label + '</p><p class="status">해당 기간에는 결과가 없어요. 기간을 "이번 주"로 바꿔보세요.</p>';
+        return;
+      }
+      let html = '<p class="result-title">' + label + '</p>';
+      items.forEach(function(it){
+        const title = it.snippet.title;
+        const channel = it.snippet.channelTitle;
+        const thumb = it.snippet.thumbnails && it.snippet.thumbnails.medium ? it.snippet.thumbnails.medium.url : "";
+        const views = formatViews(it.statistics.viewCount);
+        const date = formatDate(it.snippet.publishedAt);
+        const link = "https://www.youtube.com/watch?v=" + it.id;
+        html += '<div class="video-item">'
+          + (thumb ? '<img src="'+thumb+'" alt="">' : '')
+          + '<div class="video-info">'
+          + '<a href="'+link+'" target="_blank" rel="noopener">'+title+'</a>'
+          + '<div class="video-meta">'+channel+' · 조회수 '+views+' · '+date+'</div>'
+          + '</div></div>';
+      });
+      block.innerHTML = html;
+    }catch(err){
+      block.innerHTML = '<p class="result-title">' + label + '</p><p class="error">'+err.message+'</p>';
+    }
+  }
+
+  document.querySelectorAll(".cat-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      runSearch(btn.dataset.v, btn.dataset.q || btn.dataset.v);
+    });
+  });
+
+  function runCustomSearch(){
+    const val = document.getElementById("customTopic").value.trim();
+    if(val) runSearch(val, val);
+  }
+  document.getElementById("customSearchBtn").addEventListener("click", runCustomSearch);
+  document.getElementById("customTopic").addEventListener("keydown", function(e){
+    if(e.key === "Enter") runCustomSearch();
+  });
+</script>
+
+</body>
+</html>
